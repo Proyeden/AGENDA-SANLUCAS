@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agenda San Lucas · Dr. Cotzojay</title>
+<meta name="theme-color" content="#0F3F52">
+<style>
+  /* ── Vista de lectura para el hospital San Lucas ──────────────────────
+     Solo muestra lo de San Lucas. De Mixco y de Pinares no sale nada: ni un
+     nombre, ni un horario, ni cuántos pacientes hay. Un día ocupado en otra
+     clínica se ve, simplemente, como un día sin hora disponible. */
+  :root{
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --tinta:#0F3F52; --azul:#1A6B8A; --suave:#F2F7FA; --borde:#DCE7ED;
+    --gris:#64808C; --verde:#1B7A4B; --fondo:#F6F9FB;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:var(--font);background:var(--fondo);color:var(--tinta);
+    font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .envoltura{max-width:620px;margin:0 auto;padding:0 16px 48px}
+
+  header{background:var(--tinta);color:#fff;padding:20px 16px 18px;margin-bottom:18px}
+  header .adentro{max-width:620px;margin:0 auto;display:flex;align-items:center;gap:12px}
+  header h1{margin:0;font-size:17px;font-weight:800;letter-spacing:-.01em}
+  header p{margin:2px 0 0;font-size:12.5px;opacity:.72}
+  header .salir{margin-left:auto;border:1px solid rgba(255,255,255,.3);background:none;
+    color:#fff;border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;
+    font-family:var(--font);cursor:pointer}
+
+  /* ── Entrar ───────────────────────────────────────────────────────── */
+  .entrar{max-width:380px;margin:12vh auto 0;padding:0 20px;text-align:center}
+  .entrar h2{font-size:20px;margin:0 0 6px}
+  .entrar p{color:var(--gris);font-size:13.5px;margin:0 0 22px}
+  .entrar input{width:100%;padding:13px 14px;border:1.5px solid var(--borde);
+    border-radius:11px;font-size:16px;font-family:var(--font);margin-bottom:10px;
+    background:#fff;color:var(--tinta)}
+  .entrar input:focus{outline:none;border-color:var(--azul)}
+  .entrar button{width:100%;padding:14px;border:none;border-radius:11px;background:var(--azul);
+    color:#fff;font-size:15px;font-weight:800;font-family:var(--font);cursor:pointer;margin-top:4px}
+  .entrar .error{color:#B02A20;font-size:13px;margin-top:12px;min-height:18px}
+
+  /* ── Los días ─────────────────────────────────────────────────────── */
+  .dia{background:#fff;border:1.5px solid var(--borde);border-radius:14px;
+    padding:14px 15px;margin-bottom:11px}
+  .dia.hoy{border-color:var(--azul);border-width:2px}
+  .dia .cab{display:flex;align-items:baseline;gap:9px;margin-bottom:10px}
+  .dia .nom{font-size:15.5px;font-weight:800;text-transform:capitalize}
+  .dia .fec{font-size:13px;color:var(--gris)}
+  .dia .marca{margin-left:auto;font-size:11px;font-weight:800;text-transform:uppercase;
+    letter-spacing:.05em;color:var(--azul)}
+
+  .libre{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:11px;
+    background:#EEF8F2;border:1.5px solid #BFE3CE}
+  .libre b{font-size:19px;font-weight:800;color:var(--verde);font-variant-numeric:tabular-nums}
+  .libre span{font-size:13px;color:#2C6447}
+  .sinespacio{padding:11px 13px;border-radius:11px;background:var(--suave);
+    border:1.5px solid var(--borde);font-size:13.5px;color:var(--gris)}
+
+  .citas{list-style:none;margin:0 0 10px;padding:0}
+  .citas li{display:flex;align-items:baseline;gap:11px;padding:8px 0;
+    border-bottom:1px solid #EEF3F6}
+  .citas li:last-child{border-bottom:none}
+  .citas .h{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;
+    min-width:58px;color:var(--tinta)}
+  .citas .n{font-size:14.5px}
+  .citas .vacio{color:var(--gris);font-style:italic;font-size:13.5px}
+
+  .titulo{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--gris);margin:0 0 7px}
+  .nota{font-size:12.5px;color:var(--gris);line-height:1.55;margin:18px 2px 0;
+    padding-top:16px;border-top:1px solid var(--borde)}
+  .cargando{text-align:center;color:var(--gris);padding:40px 0;font-size:14px}
+  .recargar{display:block;width:100%;padding:13px;margin-top:4px;border:1.5px solid var(--borde);
+    background:#fff;border-radius:11px;font-size:14px;font-weight:700;color:var(--azul);
+    font-family:var(--font);cursor:pointer}
+  @media (prefers-color-scheme: dark){
+    :root{--fondo:#0E1A20;--suave:#15242C;--borde:#24404C;--tinta:#E8F1F5;--gris:#90A9B5}
+    body{background:var(--fondo)}
+    .dia,.entrar input,.recargar{background:#132129}
+    .libre{background:#12301F;border-color:#245C3B}
+    .libre span{color:#8FD4AC}
+    .citas li{border-bottom-color:#1D323C}
+  }
+</style>
+</head>
+<body>
+
+<div id="pantalla-entrar" class="entrar">
+  <h2>Agenda de San Lucas</h2>
+  <p>Consultas del Dr. Denis Cotzojay en el hospital</p>
+  <input id="correo" type="email" placeholder="Correo" autocomplete="username" inputmode="email">
+  <input id="clave" type="password" placeholder="Contraseña" autocomplete="current-password">
+  <button id="btn-entrar">Entrar</button>
+  <div class="error" id="error-entrar"></div>
+</div>
+
+<div id="pantalla-agenda" style="display:none">
+  <header>
+    <div class="adentro">
+      <div>
+        <h1>Dr. Denis Cotzojay</h1>
+        <p>Consultas en San Lucas · lunes a jueves</p>
+      </div>
+      <button class="salir" onclick="salir()">Salir</button>
+    </div>
+  </header>
+  <div class="envoltura">
+    <div id="lista"><div class="cargando">Cargando…</div></div>
+    <button class="recargar" onclick="cargar()">Actualizar</button>
+    <p class="nota">
+      Esta vista es solo de lectura y muestra únicamente las consultas de San Lucas.
+      La hora en verde es la que el doctor tiene disponible ese día; se ofrece siempre
+      la más tarde posible, y al ocuparse aparece la anterior. Un día sin hora
+      disponible es un día en que ya no alcanza el tiempo, contando el traslado.
+      <br><br>Para agendar o cambiar algo, hay que avisarle al doctor: desde acá no se
+      puede escribir.
+    </p>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+// El mismo proyecto de la agenda. Lo que esta página puede leer no lo decide
+// este archivo: lo deciden las reglas de Firestore, que le dan a esta cuenta
+// permiso de LECTURA y solo sobre la colección sanlucas_agenda. Aunque alguien
+// cambiara este código, no podría ver nada más.
+firebase.initializeApp({
+  apiKey: 'AIzaSyA_9V7qsFkYNpxG32J2YGiikvNaMZXh-eY',
+  authDomain: 'agenda-compartida-af8f4.firebaseapp.com',
+  projectId: 'agenda-compartida-af8f4',
+  storageBucket: 'agenda-compartida-af8f4.firebasestorage.app',
+  messagingSenderId: '24965817544',
+  appId: '1:24965817544:web:b76752e3145688b8a1b1fd',
+});
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto',
+               'septiembre','octubre','noviembre','diciembre'];
+const SEMANAS = 5;   // cuánto se mira hacia adelante
+
+// La fecha del día en Guatemala, armada con los componentes locales. Con
+// toISOString() —que es UTC— a partir de las 6 de la tarde «hoy» pasaría a ser
+// mañana y el primer día de la lista desaparecería.
+const clave = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const hoyClave = () => clave(new Date());
+
+auth.onAuthStateChanged(u => {
+  document.getElementById('pantalla-entrar').style.display  = u ? 'none' : '';
+  document.getElementById('pantalla-agenda').style.display  = u ? '' : 'none';
+  if(u) cargar();
+});
+
+document.getElementById('btn-entrar').onclick = entrar;
+document.getElementById('clave').addEventListener('keydown', e => { if(e.key === 'Enter') entrar(); });
+
+async function entrar(){
+  const err = document.getElementById('error-entrar');
+  err.textContent = '';
+  const correo = document.getElementById('correo').value.trim();
+  const clv = document.getElementById('clave').value;
+  if(!correo || !clv){ err.textContent = 'Falta el correo o la contraseña.'; return; }
+  try{
+    await auth.signInWithEmailAndPassword(correo, clv);
+  }catch(e){
+    // Sin detalles de más: no se le dice a nadie si un correo existe o no.
+    err.textContent = (e.code === 'auth/invalid-email')
+      ? 'Ese correo no está bien escrito.'
+      : 'No se pudo entrar. Revisá el correo y la contraseña.';
+  }
+}
+function salir(){ auth.signOut(); }
+
+async function cargar(){
+  const lista = document.getElementById('lista');
+  lista.innerHTML = '<div class="cargando">Cargando…</div>';
+
+  // Solo lunes a jueves, de hoy en adelante.
+  const dias = [];
+  const d = new Date(); d.setHours(12,0,0,0);
+  for(let i = 0; i < SEMANAS*7; i++){
+    const x = new Date(d); x.setDate(d.getDate() + i);
+    if([1,2,3,4].includes(x.getDay())) dias.push(clave(x));
+  }
+
+  let docs = {};
+  try{
+    const desde = dias[0], hasta = dias[dias.length-1];
+    const snap = await db.collection('sanlucas_agenda')
+      .where('fecha','>=',desde).where('fecha','<=',hasta).get();
+    snap.forEach(x => { docs[x.id] = x.data(); });
+  }catch(e){
+    lista.innerHTML = `<div class="sinespacio">No se pudo leer la agenda.
+      ${e.code === 'permission-denied'
+        ? 'Esta cuenta todavía no tiene permiso; avisale al doctor.'
+        : 'Revisá la conexión y volvé a intentar.'}</div>`;
+    return;
+  }
+
+  const hoy = hoyClave();
+  const html = dias.map(f => {
+    const info = docs[f] || null;
+    const fecha = new Date(f + 'T12:00:00');
+    const citas = (info && info.citas) || [];
+    const libre = info ? info.disponible : null;
+
+    // Un día del que todavía no se publicó nada no es un día sin espacio: es
+    // un día del que no sabemos. Decirlo así evita que alguien dé por libre
+    // —o por ocupado— algo que nadie ha confirmado.
+    const cuerpo = !info
+      ? `<div class="sinespacio">Todavía sin confirmar</div>`
+      : libre
+        ? `<div class="libre"><b>${esc(libre)}</b><span>disponible para una consulta</span></div>`
+        : `<div class="sinespacio">Sin espacio ese día</div>`;
+
+    return `<div class="dia ${f === hoy ? 'hoy' : ''}">
+      <div class="cab">
+        <span class="nom">${DIAS[fecha.getDay()]}</span>
+        <span class="fec">${fecha.getDate()} de ${MESES[fecha.getMonth()]}</span>
+        ${f === hoy ? '<span class="marca">Hoy</span>' : ''}
+      </div>
+      ${citas.length ? `<p class="titulo">Pacientes agendados</p>
+        <ul class="citas">${citas.map(c =>
+          `<li><span class="h">${esc(c.hora)}</span><span class="n">${
+            esc(c.nombre || 'Sin nombre')}</span></li>`).join('')}</ul>`
+        : `<p class="titulo">Pacientes agendados</p>
+           <ul class="citas"><li><span class="vacio">Ninguno todavía</span></li></ul>`}
+      ${cuerpo}
+    </div>`;
+  }).join('');
+
+  lista.innerHTML = html || '<div class="sinespacio">No hay días que mostrar.</div>';
+}
+
+function esc(t){
+  return String(t == null ? '' : t)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+</script>
+</body>
+</html>
