@@ -140,6 +140,9 @@
       La hora en verde es la que el doctor tiene disponible ese día; se ofrece siempre
       la más tarde posible, y al ocuparse aparece la anterior. Un día sin hora
       disponible es un día en que ya no alcanza el tiempo, contando el traslado.
+      <br><br>Las citas se piden <b>con un día de anticipación como mínimo</b>: llegado
+      el día ya no aparece hora, aunque quede lugar. Las que ya están agendadas para
+      hoy se siguen viendo arriba.
       <br><br>Para agendar o cambiar algo, hay que avisarle al doctor: desde acá no se
       puede escribir.
     </p>
@@ -241,11 +244,22 @@ async function cargar(){
     // Un día del que todavía no se publicó nada no es un día sin espacio: es
     // un día del que no sabemos. Decirlo así evita que alguien dé por libre
     // —o por ocupado— algo que nadie ha confirmado.
+    // ── HOY YA NO SE AGENDA ────────────────────────────────────────────
+    //
+    // Las citas se piden con un día de anticipación como mínimo. Esto se
+    // decide ACÁ además de en la agenda, a propósito: si la agenda no volvió
+    // a publicar desde anoche, el documento de hoy todavía diría que hay hora
+    // libre, y esa hora ya no existe. La fecha de hoy la sabe este teléfono,
+    // así que no hace falta confiar en que el otro lado esté al día.
+    const esHoyOAntes = f <= hoy;
     const cuerpo = !info
       ? `<div class="sinespacio">Aún sin publicar · preguntá al doctor</div>`
-      : libre
-        ? `<div class="libre"><b>${esc(libre)}</b><span>disponible para una consulta</span></div>`
-        : `<div class="sinespacio">Sin espacio ese día</div>`;
+      : esHoyOAntes
+        ? `<div class="sinespacio">Hoy ya no se agenda · las citas se piden
+             con un día de anticipación</div>`
+        : libre
+          ? `<div class="libre"><b>${esc(libre)}</b><span>disponible para una consulta</span></div>`
+          : `<div class="sinespacio">Sin espacio ese día</div>`;
 
     return `<div class="dia ${f === hoy ? 'hoy' : ''}">
       <div class="cab">
