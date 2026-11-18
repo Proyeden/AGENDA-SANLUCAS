@@ -74,7 +74,10 @@
     border-bottom:1px solid #EEF3F6}
   .citas li:last-child{border-bottom:none}
   .citas .h{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;
-    min-width:58px;color:var(--tinta)}
+    min-width:96px;color:var(--tinta)}
+  /* La hora de salida, más chica al lado: el paciente necesita saber hasta
+     cuándo, no solo desde cuándo. */
+  .citas .h small{font-size:11.5px;font-weight:700;color:var(--gris);margin-left:5px}
   .citas .n{font-size:14.5px}
   .citas .vacio{color:var(--gris);font-style:italic;font-size:13.5px}
 
@@ -165,7 +168,10 @@ const db = firebase.firestore();
 const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto',
                'septiembre','octubre','noviembre','diciembre'];
-const SEMANAS = 5;   // cuánto se mira hacia adelante
+// La agenda publica seis semanas; acá se muestran cinco. Esa semana de
+// diferencia es a propósito: así la vista nunca se asoma más allá de lo
+// publicado y no aparecen días «sin publicar» que en realidad están libres.
+const SEMANAS = 5;
 
 // La fecha del día en Guatemala, armada con los componentes locales. Con
 // toISOString() —que es UTC— a partir de las 6 de la tarde «hoy» pasaría a ser
@@ -236,7 +242,7 @@ async function cargar(){
     // un día del que no sabemos. Decirlo así evita que alguien dé por libre
     // —o por ocupado— algo que nadie ha confirmado.
     const cuerpo = !info
-      ? `<div class="sinespacio">Todavía sin confirmar</div>`
+      ? `<div class="sinespacio">Aún sin publicar · preguntá al doctor</div>`
       : libre
         ? `<div class="libre"><b>${esc(libre)}</b><span>disponible para una consulta</span></div>`
         : `<div class="sinespacio">Sin espacio ese día</div>`;
@@ -249,7 +255,8 @@ async function cargar(){
       </div>
       ${citas.length ? `<p class="titulo">Pacientes agendados</p>
         <ul class="citas">${citas.map(c =>
-          `<li><span class="h">${esc(c.hora)}</span><span class="n">${
+          `<li><span class="h">${esc(c.hora)}${
+            c.fin ? ` <small>a ${esc(c.fin)}</small>` : ''}</span><span class="n">${
             esc(c.nombre || 'Sin nombre')}</span></li>`).join('')}</ul>`
         : `<p class="titulo">Pacientes agendados</p>
            <ul class="citas"><li><span class="vacio">Ninguno todavía</span></li></ul>`}
